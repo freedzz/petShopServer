@@ -2,10 +2,10 @@
 module.exports = {
     default_module: 'api',
     weixin: {
-        appid: 'wx7af111110000000', // 小程序 appid
-        secret: 'cb8e5adce569f9bddce5b8123123e1115aaddce505', // 小程序密钥
-        mch_id: '15988888888', // 商户帐号ID
-        partner_key: 'asdasdasdasdasdasdasd', // 微信支付密钥
+        appid: 'wx361ad9ad1c2aa15a', // 小程序 appid
+        secret: '437fad518d646fad6ebfb6b12246f407', // 小程序密钥
+        mch_id: '', // 商户帐号ID
+        partner_key: '', // 微信支付密钥
         notify_url: 'https://www.您的域名.com/api/pay/notify' // 微信支付异步通知
     },
     express: {
