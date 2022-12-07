@@ -5,6 +5,26 @@ module.exports = class extends think.Controller {
 		const tokenSerivce = think.service('token', 'api');
 		think.userId = tokenSerivce.getUserId(token);
 	}
+  /**
+   * 把对象中的key由下横线转换成驼峰
+   * @param {Object} obj 对象
+   */
+  toCamelObj(obj){
+    let camelObj = {}
+    for(let key in obj){
+      camelObj[this.toCamel(key)] = obj[key]
+    }
+    return camelObj
+  }
+  /**
+   * 下横线转驼峰式
+   * test_to_camel => testToCamel
+   */
+  toCamel(str) {
+    return str.replace(/([^_])(?:_+([^_]))/g, function ($0, $1, $2) {
+      return $1 + $2.toUpperCase();
+    });
+  }
 	/**
 	 * 获取时间戳
 	 * @returns {Number}

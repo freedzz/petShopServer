@@ -9,7 +9,8 @@ module.exports = {
     'goods',
     'search',
     'region',
-    'address'
+    'address',
+    'petFile'
   ],
 
   // 可以公开访问的Action
