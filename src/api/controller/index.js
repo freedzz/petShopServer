@@ -9,6 +9,17 @@ module.exports = class extends Base {
         //auto render template file index_index.html
         // return this.display();
     }
+    async getQiniuTokenAction(){
+        const TokenSerivce = this.service('qiniu'); // 服务里返回token
+        let data = await TokenSerivce.getQiniuToken(); // 取得token值 goods
+        let qiniuToken = data.uploadToken;
+        let domain = data.domain;
+        let info ={
+            token:qiniuToken,
+            url:domain
+        };
+        return this.success(info);
+    }
     async appInfoAction() {
         const banner = await this.model('ad').where({
             enabled: 1,
