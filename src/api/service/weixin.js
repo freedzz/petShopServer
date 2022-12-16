@@ -50,13 +50,13 @@ module.exports = class extends think.Service {
         return new Promise((resolve, reject) => {
             // let total_fee = this.getTotalFee(payInfo.out_trade_no);
             weixinpay.createUnifiedOrder({
-                body: payInfo.body,
-                out_trade_no: payInfo.out_trade_no,
-                total_fee: payInfo.total_fee,
+                body: payInfo.body, // 商品描述
+                out_trade_no: payInfo.out_trade_no, // 商户系统内部订单号，只能是数字、大小写字母_-*且在同一个商户号下唯一
+                total_fee: payInfo.total_fee, // 订单总金额，单位为分
                 // total_fee: total_fee,
-                spbill_create_ip: payInfo.spbill_create_ip,
-                notify_url: think.config('weixin.notify_url'),
-                trade_type: 'JSAPI'
+                spbill_create_ip: payInfo.spbill_create_ip, // 终端ip
+                notify_url: think.config('weixin.notify_url'), // 通知地址 异步接收微信支付结果通知的回调地址，通知url必须为外网可访问的url，不能携带参数。 公网域名必须为https
+                trade_type: 'JSAPI' // 请求交易类型
             }, (res) => {
                 console.log(res);
                 if (res.return_code === 'SUCCESS' && res.result_code === 'SUCCESS') {

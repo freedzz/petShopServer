@@ -4,7 +4,7 @@ const generate = require('nanoid/generate');
 module.exports = class extends Base {
     async savePetFileAction() {
         let petFileId = this.post('id');
-        const userId = this.getLoginUserId();;
+        const userId = this.getLoginUserId();
         const petData = {
             user_id: this.getLoginUserId(),
             pet_name: this.post('petName'),

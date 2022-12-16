@@ -10,7 +10,8 @@ module.exports = {
     'search',
     'region',
     'address',
-    'petFile'
+    'petFile',
+    'userExt'
   ],
 
   // 可以公开访问的Action
