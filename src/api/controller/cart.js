@@ -56,7 +56,8 @@ module.exports = class extends Base {
           is_delete: 1
         });
       } else {
-        let retail_price = isVipUser ? (product.retail_price * 0.95).toFixed(2) : product.retail_price;
+        let retail_price = product.retail_price;
+        
         let productNum = product.goods_number;
         // 4.14 更新
         if (productNum <= 0 || product.is_on_sale == 0) {
@@ -101,13 +102,22 @@ module.exports = class extends Base {
     }
     let cAmount = checkedGoodsAmount.toFixed(2);
     let aAmount = checkedGoodsAmount;
+    // 2022/12/16 新增vip用户95折
+    // 新增vip 95折
+    cartList = cartList.map((cart) => {
+      return {
+        ...cart,
+        retail_price: isVipUser ? (cart.retail_price * 0.95).toFixed(2) : cart.retail_price,
+        add_price: isVipUser ? (cart.retail_price * 0.95).toFixed(2) : cart.retail_price
+      }
+    })
     return {
       cartList: cartList,
       cartTotal: {
         goodsCount: goodsCount,
-        goodsAmount: goodsAmount.toFixed(2),
+        goodsAmount: isVipUser ? (goodsAmount * 0.95).toFixed(2) : goodsAmount.toFixed(2),
         checkedGoodsCount: checkedGoodsCount,
-        checkedGoodsAmount: cAmount,
+        checkedGoodsAmount: isVipUser ? (cAmount * 0.95).toFixed(2) : cAmount.toFixed(2),
         user_id: userId,
         numberChange: numberChange
       }

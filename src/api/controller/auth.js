@@ -1,5 +1,6 @@
 const Base = require('./base.js');
 const rp = require('request-promise');
+const moment = require('moment');
 module.exports = class extends Base {
     async loginByWeixinAction() {
         // const code = this.post('code');
@@ -92,6 +93,18 @@ module.exports = class extends Base {
         if (think.isEmpty(newUserInfo) || think.isEmpty(sessionKey)) {
             return this.fail('登录失败4');
         }
+        // 更新用户vip信息，如果已到期is_vip设置0
+        // TODO 支付时校验vip是否到期
+        // TODO 如果用户到期前没有推出登录，会有bug
+        let userExtInfo = await this.model('user_ext').where({ user_id: userId }).find();
+        if (!think.isEmpty(userExtInfo) && userExtInfo.is_vip === 1) {
+          const nowDate = moment()
+          const vipEndTime = moment(userExtInfo.vip_end_time)
+          if(nowDate > vipEndTime){
+            await this.model('user_ext').where({ user_id: userId }).update({ is_vip: 0 })
+          }
+        }
+        
         return this.success({
             token: sessionKey,
             userInfo: newUserInfo,

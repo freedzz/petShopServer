@@ -293,12 +293,25 @@ module.exports = class extends Base {
         return this.success(succesInfo);
     }
     /**
+     * 获取用户vip信息和账户信息
+     */
+    async getUserExtInfoAction(){
+      const userId = this.getLoginUserId();
+      let userInfo = await this.model('user_ext').where({
+        user_id: userId
+      }).find();
+      if (!think.isEmpty(userInfo)) {
+        userInfo = this.toCamelObj(userInfo)
+      }
+      return userInfo;
+    }
+    /**
      * 提交订单
      * @returns {Promise.<void>}
      */
     async submitAction() {
         // 获取收货地址信息和计算运费
-		const userId = this.getLoginUserId();;
+		    const userId = this.getLoginUserId();
         const addressId = this.post('addressId');
         const freightPrice = this.post('freightPrice');
         const offlinePay = this.post('offlinePay');
@@ -307,6 +320,10 @@ module.exports = class extends Base {
         const checkedAddress = await this.model('address').where({
             id: addressId
         }).find();
+        // 新增vip用户优惠价格 95折
+        const userExtInfo = await this.getUserExtInfoAction();
+        const isVipUser = userExtInfo.isVip ? true : false
+        
         if (think.isEmpty(checkedAddress)) {
             return this.fail('请选择收货地址');
         }
@@ -341,9 +358,10 @@ module.exports = class extends Base {
         // 获取订单使用的红包
         // 如果有用红包，则将红包的数量减少，当减到0时，将该条红包删除
         // 统计商品总价
+        // 2022/12/16 增加vip用户95折
         let goodsTotalPrice = 0.00;
         for (const cartItem of checkedGoodsList) {
-            goodsTotalPrice += cartItem.number * cartItem.retail_price;
+            goodsTotalPrice += cartItem.number *  (isVipUser ? (cartItem.retail_price * 0.95).toFixed(2) : cartItem.retail_price)
         }
         // 订单价格计算
         const orderTotalPrice = goodsTotalPrice + freightPrice; // 订单的总价
