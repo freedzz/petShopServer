@@ -67,6 +67,13 @@ module.exports = class extends Base {
                 city: userInfo.city
             });
             is_new = 1;
+            // userExt也注册一条新数据
+            await this.model('user_ext').add({
+              is_vip: 0,
+              wallet_balance: 0,
+              user_id: userId,
+              user_points: 0
+            })
         }
         sessionData.user_id = userId;
         // 查询用户信息

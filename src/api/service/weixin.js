@@ -4,6 +4,8 @@ const moment = require('moment');
 const rp = require('request-promise');
 const fs = require('fs');
 const http = require("http");
+const WxPay = require('wechatpay-node-v3');
+
 module.exports = class extends think.Service {
     /**
      * 解析微信登录用户数据
@@ -40,77 +42,46 @@ module.exports = class extends think.Service {
      * @returns {Promise}
      */
     async createUnifiedOrder(payInfo) {
-        const WeiXinPay = require('weixinpay');
-        const weixinpay = new WeiXinPay({
+        const weixinpay = new WxPay({
             appid: think.config('weixin.appid'), // 微信小程序appid
-            openid: payInfo.openid, // 用户openid
-            mch_id: think.config('weixin.mch_id'), // 商户帐号ID
-            partner_key: think.config('weixin.partner_key') // 秘钥
+            mchid: think.config('weixin.mch_id'), // 商户帐号ID
+            publicKey: fs.readFileSync('./src/api/service/weixinPem/apiclient_cert.pem'), // 公钥
+            privateKey: fs.readFileSync('./src/api/service/weixinPem/apiclient_key.pem') // 私钥
         });
-        return new Promise((resolve, reject) => {
-            // let total_fee = this.getTotalFee(payInfo.out_trade_no);
-            weixinpay.createUnifiedOrder({
-                body: payInfo.body, // 商品描述
-                out_trade_no: payInfo.out_trade_no, // 商户系统内部订单号，只能是数字、大小写字母_-*且在同一个商户号下唯一
-                total_fee: payInfo.total_fee, // 订单总金额，单位为分
-                // total_fee: total_fee,
-                spbill_create_ip: payInfo.spbill_create_ip, // 终端ip
-                notify_url: think.config('weixin.notify_url'), // 通知地址 异步接收微信支付结果通知的回调地址，通知url必须为外网可访问的url，不能携带参数。 公网域名必须为https
-                trade_type: 'JSAPI' // 请求交易类型
-            }, (res) => {
-                console.log(res);
-                if (res.return_code === 'SUCCESS' && res.result_code === 'SUCCESS') {
-                    const returnParams = {
-                        'appid': res.appid,
-                        'timeStamp': parseInt(Date.now() / 1000) + '',
-                        'nonceStr': res.nonce_str,
-                        'package': 'prepay_id=' + res.prepay_id,
-                        'signType': 'MD5'
-                    };
-                    const paramStr = `appId=${returnParams.appid}&nonceStr=${returnParams.nonceStr}&package=${returnParams.package}&signType=${returnParams.signType}&timeStamp=${returnParams.timeStamp}&key=` + think.config('weixin.partner_key');
-                    returnParams.paySign = md5(paramStr).toUpperCase();
-                    let order_sn = payInfo.out_trade_no;
-                    resolve(returnParams);
-                } else {
-                    reject(res);
-                }
-            });
+        
+        return new Promise(async (resolve, reject) => {
+          const params = {
+            description: payInfo.body,
+            out_trade_no: payInfo.out_trade_no,
+            notify_url: think.config('weixin.notify_url'),
+            attach: JSON.stringify({ // 1商品付款 2vip充值 3余额充值
+              orderType: payInfo.orderType || 1,
+            }),
+            amount: {
+              total: payInfo.total_fee,
+            },
+            payer: {
+              openid: payInfo.openid, // 用户openid
+            },
+            scene_info: {
+              payer_client_ip: payInfo.spbill_create_ip,
+            }
+          }
+          let res = await weixinpay.transactions_jsapi(params)
+          if (res.status === 200) {
+              const returnParams = {
+                  'appid': res.appid,
+                  'timeStamp': res.timeStamp,
+                  'nonceStr': res.nonceStr,
+                  'package': res.package,
+                  'signType': 'RSA',
+                  'paySign': res.paySign
+              };
+              resolve(returnParams);
+          } else {
+              reject(res);
+          }
         });
-    }
-    async getTotalFee(sn) {
-        let total_fee = await this.model('order').where({
-            order_sn: sn
-        }).field('actual_price').find();
-        let res = total_fee.actual_price;
-        return res;
-    }
-    /**
-     * 生成排序后的支付参数 query
-     * @param queryObj
-     * @returns {Promise.<string>}
-     */
-    buildQuery(queryObj) {
-        const sortPayOptions = {};
-        for (const key of Object.keys(queryObj).sort()) {
-            sortPayOptions[key] = queryObj[key];
-        }
-        let payOptionQuery = '';
-        for (const key of Object.keys(sortPayOptions).sort()) {
-            payOptionQuery += key + '=' + sortPayOptions[key] + '&';
-        }
-        payOptionQuery = payOptionQuery.substring(0, payOptionQuery.length - 1);
-        return payOptionQuery;
-    }
-    /**
-     * 对 query 进行签名
-     * @param queryStr
-     * @returns {Promise.<string>}
-     */
-    signQuery(queryStr) {
-        queryStr = queryStr + '&key=' + think.config('weixin.partner_key');
-        const md5 = require('md5');
-        const md5Sign = md5(queryStr);
-        return md5Sign.toUpperCase();
     }
     /**
      * 处理微信支付回调
@@ -121,26 +92,17 @@ module.exports = class extends think.Service {
         if (think.isEmpty(notifyData)) {
             return false;
         }
-        const notifyObj = {};
-        let sign = '';
-        for (const key of Object.keys(notifyData)) {
-            if (key !== 'sign') {
-                notifyObj[key] = notifyData[key][0];
-            } else {
-                sign = notifyData[key][0];
-            }
-        }
-        if (notifyObj.return_code !== 'SUCCESS' || notifyObj.result_code !== 'SUCCESS') {
+        if (!notifyData.resource || notifyData.summary !== '支付成功' || notifyData.event_type !== 'TRANSACTION.SUCCESS') {
             return false;
         }
-        const signString = this.signQuery(this.buildQuery(notifyObj));
-        if (think.isEmpty(sign) || signString !== sign) {
-            return false;
-        }
-        let timeInfo = notifyObj.time_end;
-        let pay_time = moment(timeInfo, 'YYYYMMDDHHmmss');
-        notifyObj.time_end = new Date(Date.parse(pay_time)).getTime() / 1000
-        return notifyObj;
+        const weixinpay = new WxPay({
+            appid: think.config('weixin.appid'), // 微信小程序appid
+            mchid: think.config('weixin.mch_id'), // 商户帐号ID
+            publicKey: fs.readFileSync('./src/api/service/weixinPem/apiclient_cert.pem'), // 公钥
+            privateKey: fs.readFileSync('./src/api/service/weixinPem/apiclient_key.pem') // 私钥
+        });
+        const result = weixinpay.decipher_gcm(notifyData.resource.ciphertext, notifyData.resource.associated_data, notifyData.resource.nonce, think.config('weixin.partner_key'));
+        return result;
     }
     /**
      * 申请退款

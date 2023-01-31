@@ -74,11 +74,15 @@ module.exports = class extends think.Model {
 		
         const currentTime = parseInt(new Date().getTime() / 1000);
         console.log('==============orderExpress===============');
-        let info = await this.model('order_express').where({
-            order_id: orderId
-        }).find();
+        let info = await this.model('order_express').where({ order_id: orderId }).find();
         if (think.isEmpty(info)) {
-            return this.fail(400, '暂无物流信息');
+            // return this.fail(400, '暂无物流信息');
+            // 解决接口报错
+            return {
+              traces: '{}',
+              is_finish: '',
+              logistic_code: ''
+            }
         }
         const expressInfo = await this.model('order_express').where({
             order_id: orderId

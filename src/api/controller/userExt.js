@@ -20,7 +20,9 @@ module.exports = class extends Base {
       userExtId = await this.model('user_ext').add({
         ...userExtInfo,
         vip_start_time: vipStartTime,
-        vip_end_time: vipEndTime
+        vip_end_time: vipEndTime,
+        user_points: 0,
+        wallet_balance: 0
       });
     } else {
       // 有用户记录
@@ -53,7 +55,9 @@ module.exports = class extends Base {
     const userId = this.getLoginUserId();
     if (think.isEmpty(userExtId)) {
       let userInfo = await this.model('user_ext').add({
-        wallet_balance: this.post('rechargeAmount').toFixed(2)
+        wallet_balance: this.post('rechargeAmount').toFixed(2),
+        user_id: userId,
+        user_points: 0
       })
     } else {
       let userInfo = await this.model('user_ext').where({ id: userExtId }).find();

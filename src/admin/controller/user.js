@@ -60,6 +60,14 @@ module.exports = class extends Base {
             user_id: id,
             is_delete: 0
         }).sum('number');
+        // 2023/01/08 新增用户积分
+        let userExtInfo = await this.model('user_ext').where({ user_id: id }).find()
+        info.userPoints = userExtInfo.user_points || 0
+        // 新增账户余额
+        info.walletBalance = userExtInfo.wallet_balance || 0
+        // vip到期时间
+        info.vipEndTime = userExtInfo.vip_end_time || '-'
+        
         return this.success(info);
     }
     async addressAction() {

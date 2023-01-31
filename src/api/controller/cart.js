@@ -117,7 +117,7 @@ module.exports = class extends Base {
         goodsCount: goodsCount,
         goodsAmount: isVipUser ? (goodsAmount * 0.95).toFixed(2) : goodsAmount.toFixed(2),
         checkedGoodsCount: checkedGoodsCount,
-        checkedGoodsAmount: isVipUser ? (cAmount * 0.95).toFixed(2) : cAmount.toFixed(2),
+        checkedGoodsAmount: isVipUser ? (cAmount * 0.95).toFixed(2) : cAmount,
         user_id: userId,
         numberChange: numberChange
       }
