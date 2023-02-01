@@ -359,9 +359,10 @@ module.exports = class extends Base {
         // 如果有用红包，则将红包的数量减少，当减到0时，将该条红包删除
         // 统计商品总价
         // 2022/12/16 增加vip用户95折
+        const vipDiscount = think.config('vipDiscount')
         let goodsTotalPrice = 0.00;
         for (const cartItem of checkedGoodsList) {
-            goodsTotalPrice += cartItem.number *  (isVipUser ? (cartItem.retail_price * 0.95).toFixed(2) : cartItem.retail_price)
+            goodsTotalPrice += cartItem.number *  (isVipUser ? (cartItem.retail_price * vipDiscount).toFixed(2) : cartItem.retail_price)
         }
         // 订单价格计算
         const orderTotalPrice = goodsTotalPrice + freightPrice; // 订单的总价

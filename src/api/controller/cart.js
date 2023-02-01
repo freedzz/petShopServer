@@ -104,20 +104,21 @@ module.exports = class extends Base {
     let aAmount = checkedGoodsAmount;
     // 2022/12/16 新增vip用户95折
     // 新增vip 95折
+    const vipDiscount = think.config('vipDiscount')
     cartList = cartList.map((cart) => {
       return {
         ...cart,
-        retail_price: isVipUser ? (cart.retail_price * 0.95).toFixed(2) : cart.retail_price,
-        add_price: isVipUser ? (cart.retail_price * 0.95).toFixed(2) : cart.retail_price
+        retail_price: isVipUser ? (cart.retail_price * vipDiscount).toFixed(2) : cart.retail_price,
+        add_price: isVipUser ? (cart.retail_price * vipDiscount).toFixed(2) : cart.retail_price
       }
     })
     return {
       cartList: cartList,
       cartTotal: {
         goodsCount: goodsCount,
-        goodsAmount: isVipUser ? (goodsAmount * 0.95).toFixed(2) : goodsAmount.toFixed(2),
+        goodsAmount: isVipUser ? (goodsAmount * vipDiscount).toFixed(2) : goodsAmount.toFixed(2),
         checkedGoodsCount: checkedGoodsCount,
-        checkedGoodsAmount: isVipUser ? (cAmount * 0.95).toFixed(2) : cAmount,
+        checkedGoodsAmount: isVipUser ? (cAmount * vipDiscount).toFixed(2) : cAmount,
         user_id: userId,
         numberChange: numberChange
       }

@@ -1,11 +1,12 @@
 // default config
 module.exports = {
     default_module: 'api',
+    vipDiscount: 0.95, // vip用户折扣
     weixin: {
         appid: 'wx883f2208bf8ff3e5', // 小程序 appid
         secret: '54e6f366c46e7ffe71daeed24bd81f40', // 小程序密钥
         mch_id: '1637046225', // 商户帐号ID
-        notify_url: 'https://www.freedzz.com/api/pay/notify' // 微信支付异步通知
+        notify_url: 'https://www.freedzz.com/api/pay/notify',// 微信支付异步通知
     },
     express: {
         // 已废弃，之后考虑改回来，做成和阿里云的物流查询可以切换，方便大家的使用

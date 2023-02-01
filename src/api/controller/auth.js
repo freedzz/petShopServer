@@ -121,4 +121,17 @@ module.exports = class extends Base {
     async logoutAction() {
         return this.success();
     }
+    async updateUserInfoAction() {
+      const userName = this.post('userName');
+      const avatar = this.post('avatar');
+      const nickname = Buffer.from(userName).toString('base64');
+      const userId = this.getLoginUserId();
+
+      await this.model('user').where({ id: userId }).update({
+          avatar: avatar,
+          nickname: nickname
+      });
+      
+      return this.success();
+    }
 };
