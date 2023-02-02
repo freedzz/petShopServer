@@ -6,6 +6,7 @@ module.exports = {
         appid: 'wx883f2208bf8ff3e5', // 小程序 appid
         secret: '54e6f366c46e7ffe71daeed24bd81f40', // 小程序密钥
         mch_id: '1637046225', // 商户帐号ID
+        partner_key: 'songlvchuan500235199509027397slc', // 微信支付密钥
         notify_url: 'https://www.freedzz.com/api/pay/notify',// 微信支付异步通知
     },
     express: {
@@ -43,8 +44,8 @@ module.exports = {
     aliexpress:{
         // https://market.aliyun.com/products/56928004/cmapi021863.html?spm=5176.730005.productlist.d_cmapi021863.6ba73524uQjLqE&innerSource=search_%E5%85%A8%E5%9B%BD%E5%BF%AB%E9%80%92%E7%89%A9%E6%B5%81%E6%9F%A5%E8%AF%A2-%E5%BF%AB%E9%80%92%E6%9F%A5%E8%AF%A2%E6%8E%A5%E5%8F%A3#sku=yuncode1586300000
         url:'http://wuliu.market.alicloudapi.com/kdi', //阿里云的物流查询api，收费的
-        appcode: 'asldjalsjdlasjdla' ,// 阿里云后台获取,
-		    sfLastNo:'0580', // 顺丰寄件人后四位，这个根据自己的寄件人手机设置，如果寄件人是不固定的，那么需要在order_express自己写代码了。
+        appcode: 'de2c711712034af4b94cba7051a396c7' ,// 阿里云后台获取,
+		    sfLastNo:'7313', // 顺丰寄件人后四位，这个根据自己的寄件人手机设置，如果寄件人是不固定的，那么需要在order_express自己写代码了。
     },
 	templateId:{
 		// deliveryTemplate:
